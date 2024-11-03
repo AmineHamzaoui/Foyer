@@ -15,9 +15,7 @@ services:
       - tpfoyer-network
 
   spring_app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tp-foyer-spring_app
     container_name: tpfoyer
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db?createDatabaseIfNotExist=true
@@ -31,9 +29,16 @@ services:
       - "8089:8089"
     depends_on:
       - mysql
+    entrypoint: >
+      sh -c "
+      while ! mysqladmin ping -h mysql --silent; do
+        echo 'Waiting for MySQL to be ready...';
+        sleep 2;
+      done;
+      java -jar app.jar
+      "
     networks:
       - tpfoyer-network
-    entrypoint: ["/wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar"]
 
 networks:
   tpfoyer-network:
