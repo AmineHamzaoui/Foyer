@@ -10,11 +10,9 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nouvelleDB?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_DATASOURCE_PASSWORD: ""  # Définir le mot de passe, même si vide
     depends_on:
       - db
-    networks:
-      - tpfoyer-network
 
   db:
     image: mysql:8.0
@@ -23,15 +21,10 @@ services:
       - "3306:3306"
     environment:
       MYSQL_DATABASE: nouvelleDB  # Nouveau nom de la base de données
-      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: ""     # Définir le mot de passe root, même si vide
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - db_data:/var/lib/mysql
-    networks:
-      - tpfoyer-network
-
-networks:
-  tpfoyer-network:
 
 volumes:
   db_data:
