@@ -33,6 +33,7 @@ services:
       - mysql
     networks:
       - tpfoyer-network
+    entrypoint: ["/wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar"]
 
 networks:
   tpfoyer-network:
