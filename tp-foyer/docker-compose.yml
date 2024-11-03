@@ -31,7 +31,7 @@ services:
       - mysql
     entrypoint: >
       sh -c "
-      while ! mysqladmin ping -h mysql --silent; do
+      while ! nc -z mysql 3306; do
         echo 'Waiting for MySQL to be ready...';
         sleep 2;
       done;
