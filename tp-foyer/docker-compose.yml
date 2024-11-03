@@ -6,11 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:8089"  # Redirige le port 80 du host vers le port 8089 du conteneur
+      - "80:8089"  # Host port 80 to container port 8089
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nouvelleDB?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: # Laissez vide pour pas de mot de passe
+      SPRING_DATASOURCE_PASSWORD: ""
+      SERVER_SERVLET_CONTEXT_PATH: /api
+      SERVER_PORT: 8089
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL5InnoDBDialect
+      LOGGING_LEVEL_ROOT: info
     depends_on:
       - db
 
@@ -20,9 +26,9 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: nouvelleDB  # Nom de la base de données
-      MYSQL_ROOT_PASSWORD: # Définissez ici un mot de passe pour l'utilisateur root
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes # Si vous voulez laisser le mot de passe vide
+      MYSQL_DATABASE: nouvelleDB
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - db_data:/var/lib/mysql
 
