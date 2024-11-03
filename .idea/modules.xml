@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/tp-foyer/tp-foyer.iml" filepath="$PROJECT_DIR$/tp-foyer/tp-foyer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/tp-foyer (Projet examen).iml" filepath="$PROJECT_DIR$/.idea/tp-foyer (Projet examen).iml" />
     </modules>
   </component>
