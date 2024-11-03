@@ -8,12 +8,11 @@ services:
     ports:
       - "80:8089"  # Redirige le port 80 du host vers le port 8089 du conteneur
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nouvelleDB?createDatabaseIfNotExist=true&wait_timeout=5000&connectTimeout=5000
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nouvelleDB?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ""  # Laissez vide pour pas de mot de passe
+      SPRING_DATASOURCE_PASSWORD: # Laissez vide pour pas de mot de passe
     depends_on:
       - db
-    command: ["wait-for-it.sh", "db:3306", "--", "java", "-jar", "/app/app.jar"]
 
   db:
     image: mysql:8.0
@@ -21,9 +20,9 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: nouvelleDB  # Nom de la base de données gardé
-      MYSQL_ROOT_PASSWORD: ""  # Laissez vide pour pas de mot de passe
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Autorise le mot de passe vide
+      MYSQL_DATABASE: nouvelleDB  # Nom de la base de données
+      MYSQL_ROOT_PASSWORD: # Définissez ici un mot de passe pour l'utilisateur root
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes # Si vous voulez laisser le mot de passe vide
     volumes:
       - db_data:/var/lib/mysql
 
