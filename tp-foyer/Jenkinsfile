@@ -1,1 +1,85 @@
+pipeline {
+    agent any
+    tools {
+        maven "M2_HOME"
+    }
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        MYSQL_CREDENTIALS = credentials('mysql-credentials')
 
+    
+    }
+    stages {
+
+
+
+        stage("Maven Build") {
+            steps {
+                 dir('tp-foyer') {
+                   sh "mvn package -DskipTests=true"
+                }
+                
+            }
+        }
+
+       
+        stage('Compile') {
+            steps {
+                dir('tp-foyer') {
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+
+       stage('SonnarQube') {
+            steps {
+                dir('tp-foyer') {
+                    withSonarQubeEnv('sq1') {
+                        sh 'mvn sonar:sonar -Dsonar.java.binaries=target/classes'
+                    }
+                }
+            }
+        } 
+
+
+     stage('Build Backend Docker Image') {
+            steps {
+                dir('tp-foyer') {
+                    sh 'docker build -t tpfoyer-backend .'
+                    
+                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    sh 'docker tag tpfoyer-backend ademkahouli/tpfoyer-5bi7:$BUILD_NUMBER'
+                    sh 'docker push ademkahouli/tpfoyer-5bi7:$BUILD_NUMBER'
+                }
+            }
+        }
+        
+  stage('Stop Old Containers') {
+            steps {
+                sh 'docker stop mysql_db || true && docker rm mysql_db || true'
+                sh 'docker stop backend_ctr || true && docker rm backend_ctr || true'
+              
+            }
+        }
+    
+
+      stage('Deploy Application Docker Compose ') {
+        steps {
+        script {
+            dir('kaddem') {
+            // Update Docker Compose environment variables
+            withEnv(["MYSQL_ROOT_PASSWORD=${MYSQL_CREDENTIALS_PSW}", "BUILD_NUMBER=${env.BUILD_NUMBER}"]) {
+                sh 'docker-compose down'  // Stop any running containers
+                sh 'docker-compose up -d' // Start containers with updated configuration
+            }
+                }
+
+        }
+    }
+}
+
+        
+    }
+
+ }
+ 
