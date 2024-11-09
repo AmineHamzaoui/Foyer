@@ -64,7 +64,7 @@ pipeline {
       stage('Deploy Application Docker Compose ') {
         steps {
         script {
-            dir('kaddem') {
+            dir('tp-foyer') {
             // Update Docker Compose environment variables
             withEnv(["MYSQL_ROOT_PASSWORD=${MYSQL_CREDENTIALS_PSW}", "BUILD_NUMBER=${env.BUILD_NUMBER}"]) {
                 sh 'docker-compose down'  // Stop any running containers
