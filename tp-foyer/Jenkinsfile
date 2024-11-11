@@ -27,13 +27,7 @@ pipeline {
         }
 
        
-        stage('Compile') {
-            steps {
-                dir('tp-foyer') {
-                    sh 'mvn clean compile'
-                }
-            }
-        }
+       
 
           stage("Upload to Nexus") {
             steps {
@@ -62,6 +56,13 @@ pipeline {
                     )
                 }
             }
+            }
+        }
+         stage('Compile') {
+            steps {
+                dir('tp-foyer') {
+                    sh 'mvn clean compile'
+                }
             }
         }
       
