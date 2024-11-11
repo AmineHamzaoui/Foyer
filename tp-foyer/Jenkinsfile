@@ -38,8 +38,8 @@ pipeline {
             steps {
                 dir('kaddem'){
                 script {
-                    def artifactId = 'kaddem'  // Define your artifact ID
-                    def version = '0.0.1-SNAPSHOT'                  // Define the version
+                    def artifactId = 'tp-foyer'  // Define your artifact ID
+                    def version = '5.0.0'                  // Define the version
                     def packaging = 'jar'                // Define the packaging type (e.g., jar)
 
                     // Correct usage of nexusArtifactUploader
