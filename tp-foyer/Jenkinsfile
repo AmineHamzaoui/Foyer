@@ -33,6 +33,38 @@ pipeline {
                 }
             }
         }
+
+          stage("Upload to Nexus") {
+            steps {
+                dir('kaddem'){
+                script {
+                    def artifactId = 'kaddem'  // Define your artifact ID
+                    def version = '0.0.1-SNAPSHOT'                  // Define the version
+                    def packaging = 'jar'                // Define the packaging type (e.g., jar)
+
+                    // Correct usage of nexusArtifactUploader
+                    nexusArtifactUploader(
+                        nexusVersion: NEXUS_VERSION,
+                        protocol: NEXUS_PROTOCOL,
+                        nexusUrl: NEXUS_URL,
+                        groupId: GROUP_ID,
+                        artifactId: artifactId,
+                        version: version,
+                        repository: NEXUS_REPOSITORY,
+                        credentialsId: CREDENTIALS_ID,
+                        artifacts: [
+                            [artifactId: artifactId,
+                             classifier: '',
+                             file: "target/${artifactId}-${version}.${packaging}",
+                             type: packaging]
+                        ]
+                    )
+                }
+            }
+            }
+        }
+      
+        
         stage('Junit+Mock') {
             steps {
                 dir('tp-foyer') {
