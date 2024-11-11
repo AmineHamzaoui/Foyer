@@ -28,6 +28,13 @@ pipeline {
                 }
             }
         }
+        stage('Junit+Mock') {
+            steps {
+                dir('tp-foyer') {
+                    sh 'mvn test'
+                }
+            }
+        }
 
        stage('SonnarQube') {
             steps {
