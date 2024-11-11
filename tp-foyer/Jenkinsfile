@@ -4,7 +4,12 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         MYSQL_CREDENTIALS = credentials('mysql-credentials')
-
+        NEXUS_VERSION = 'nexus3'
+        NEXUS_PROTOCOL = 'http'
+        NEXUS_URL = '192.168.43.183:8081' // Nexus server base URL
+        NEXUS_REPOSITORY = 'tpfoyer-AdemKahouli-5BI7'  // Nexus repository name
+        CREDENTIALS_ID = 'nexus-cred'      // Jenkins credentials ID for Nexus
+        GROUP_ID = 'tn.esprit'  // Group ID for the artifact
     
     }
     stages {
