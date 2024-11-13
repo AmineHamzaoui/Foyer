@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+       environment {
+        IMAGE_NAME = "eya-app"
+        DOCKER_HUB_REPO = "eyaamamou/${IMAGE_NAME}"
+    }
+   
+    stages {
+ 
+        stage('Checkout Code') {
+            steps {
+                git branch: 'feature/amamoueya', credentialsId: 'github-creds', url: 'https://github.com/AmineHamzaoui/Foyer.git'
+            }
+        }
+ 
+        // Stage 2: Run Docker Compose for Spring Project
+        stage('Docker Compose Spring Project') {
+            steps {
+                sh 'docker-compose -f docker-compose.yml up -d'
+            }
+        }
+ 
+        // Stage 3: Run Docker Compose for Tools
+        stage('Docker Compose Tools') {
+            steps {
+                sh 'docker-compose -f docker-composetools.yml up -d'
+            }
+        }
+ 
+        stage('Build with Maven') {
+            steps {
+                sh 'mvn clean compile jacoco:report'
+            }
+        }
+ 
+        stage('Test Unitaires et Jacoco') {
+            steps {
+                sh 'mvn clean test'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn package' 
+            }
+        }
+ 
+        // Stage 5: Analyze Code with SonarQube
+        stage('MVN SonarQube') {
+            steps {
+                script {
+                    withSonarQubeEnv('sonarserver') {
+                        withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_TOKEN')]) {
+                            sh '''
+                                mvn sonar:sonar \
+                                    -Dsonar.projectKey=springproject \
+                                    -Dsonar.host.url=http://192.168.33.10:9000 \
+                                    -Dsonar.login=${SONAR_TOKEN} \
+                                    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+ 
+        // Stage for Quality Gate
+        stage('Quality Gate') {
+            steps {
+                script {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Quality Gate failed: ${qg.status}"
+                    } else {
+                        echo "Quality Gate passed: ${qg.status}"
+                    }
+                }
+            }
+        }
+ 
+        // Stage 3: Deploy to Nexus
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    nexusArtifactUploader(
+                        nexusVersion: 'nexus3',
+                        protocol: 'http',
+                        nexusUrl: '192.168.33.10:8081',
+                        groupId: 'com.projet',
+                        version: '0.0.1-SNAPSHOT',
+                        repository: 'maven-snapshots',
+                        credentialsId: 'NEXUS_CRED',
+                        artifacts: [
+                            [
+                                artifactId: '',
+                                classifier: '',
+                                file: 'target/',
+                                type: 'jar'
+                            ]
+                        ]
+                    )
+                }
+            }
+            post {
+                success {
+                    echo 'Deployment to Nexus successful.'
+                }
+                failure {
+                    echo 'Error during Nexus deployment.'
+                }
+            }
+        }
+    }
+ 
+ 
+}
+
