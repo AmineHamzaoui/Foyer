@@ -1,12 +1,47 @@
 pipeline {
     agent any
-       environment {
+    environment {
         IMAGE_NAME = "eya-app"
         DOCKER_HUB_REPO = "eyaamamou/${IMAGE_NAME}"
+        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-creds'
+    }
+
+    parameters {
+        booleanParam(name: 'SKIP_BUILD_DOCKER_IMAGE', defaultValue: false, description: 'Skip Docker Image Build Stage')
+        booleanParam(name: 'SKIP_PUSH_DOCKER_IMAGE', defaultValue: false, description: 'Skip Docker Image Push Stage')
     }
    
     stages {
- 
+        // New Stage: Build Docker Image
+        stage('Build Docker Image') {
+            when {
+                expression { return !params.SKIP_BUILD_DOCKER_IMAGE }
+            }
+            steps {
+                script {
+                    // Build Docker image from Dockerfile
+                    sh "docker build -t ${DOCKER_HUB_REPO}:latest ."
+                }
+            }
+        }
+
+        // New Stage: Push Docker Image to Docker Hub
+        stage('Push Docker Image to Docker Hub') {
+            when {
+                expression { return !params.SKIP_PUSH_DOCKER_IMAGE }
+            }
+            steps {
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    }
+                    // Push Docker image
+                    sh "docker push ${DOCKER_HUB_REPO}:latest"
+                }
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'feature/amamoueya', credentialsId: 'github-creds', url: 'https://github.com/AmineHamzaoui/Foyer.git'
@@ -38,6 +73,7 @@ pipeline {
                 sh 'mvn clean test'
             }
         }
+        
         stage('Build') {
             steps {
                 sh 'mvn package' 
@@ -110,7 +146,4 @@ pipeline {
             }
         }
     }
- 
- 
 }
-
