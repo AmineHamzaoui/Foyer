@@ -137,5 +137,28 @@ pipeline {
                 }
             }
         }
+         // Final Stage: Send Email Notification
+        stage('Send Email Notification') {
+            when {
+                success()
+            }
+            steps {
+                emailext(
+                    to: 'aya.amamou@esprit.tn',
+                    subject: "Jenkins Pipeline Success: ${env.JOB_NAME}",
+                    body: """
+                        Hi,
+
+                        The Jenkins pipeline for the job '${env.JOB_NAME}' has successfully completed.
+
+                        Build Number: ${env.BUILD_NUMBER}
+                        Job URL: ${env.BUILD_URL}
+
+                        Regards,
+                        Jenkins
+                    """
+                )
+            }
+        }
     }
 }
