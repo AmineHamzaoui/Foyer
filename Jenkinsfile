@@ -119,7 +119,12 @@ pipeline {
                 }
             }
         }*/
- 
+ stage('Verify Artifact') {
+    steps {
+        sh 'ls -l target'
+    }
+}
+
         // Stage 3: Deploy to Nexus
         stage('Deploy to Nexus') {
             steps {
@@ -129,15 +134,15 @@ pipeline {
                         protocol: 'http',
                         nexusUrl: '192.168.33.10:8081',
                         groupId: 'com.projet',
-                        version: '0.0.1-SNAPSHOT',
-                        repository: 'maven-snapshots',
+                        version: '5.0.0',
+                        repository: 'maven-releases',
                         credentialsId: 'NEXUS_CRED',
                         artifacts: [
                             [
-                                artifactId: '',
-                                classifier: '',
-                                file: 'target/',
-                                type: 'jar'
+                             artifactId: 'tp-foyer',
+                             classifier: '', // If no classifier is used, leave it empty
+                             file: 'target/tp-foyer-5.0.0.jar',
+                             type: 'jar'
                             ]
                         ]
                     )
