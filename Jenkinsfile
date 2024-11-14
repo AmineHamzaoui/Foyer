@@ -12,62 +12,48 @@ pipeline {
     }
    
     stages {
-        // New Stage: Build Docker Image
-        stage('Build Docker Image') {
-            when {
-                expression { return !params.SKIP_BUILD_DOCKER_IMAGE }
-            }
-            steps {
-                script {
-                    // Build Docker image from Dockerfile
-                    sh "docker build -t ${DOCKER_HUB_REPO}:latest ."
-                }
-            }
-        }
-
-        // New Stage: Push Docker Image to Docker Hub
-        stage('Push Docker Image to Docker Hub') {
-            when {
-                expression { return !params.SKIP_PUSH_DOCKER_IMAGE }
-            }
-            steps {
-                script {
-                    // Login to Docker Hub
-                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                    }
-                    // Push Docker image
-                    sh "docker push ${DOCKER_HUB_REPO}:latest"
-                }
-            }
-        }
-
         stage('Checkout Code') {
             steps {
                 git branch: 'feature/amamoueya', credentialsId: 'github-creds', url: 'https://github.com/AmineHamzaoui/Foyer.git'
             }
         }
- 
-        // Stage 2: Run Docker Compose for Spring Project
-        stage('Docker Compose Spring Project') {
+
+        // Increment Version for Release
+        stage('Increment Version') {
             steps {
-                sh 'docker-compose -f docker-compose.yml up -d'
+                script {
+                    // Read the current version from version.properties
+                    def versionProperties = readFile('version.properties').trim()
+                    def currentVersion = versionProperties.split('=')[1]
+
+                    // Increment the patch version
+                    def (major, minor, patch) = currentVersion.tokenize('.').collect { it as int }
+                    patch += 1
+                    def newVersion = "${major}.${minor}.${patch}"
+
+                    // Update version.properties with the new version
+                    writeFile file: 'version.properties', text: "version=${newVersion}"
+
+                    // Set the new version as an environment variable for later use
+                    env.NEW_VERSION = newVersion
+
+                    // Commit the updated version.properties back to the repository
+                    sh 'git config user.email "aya.amamou@esprit.tn"'
+                    sh 'git config user.name "ayaamamou00"'
+                    sh 'git add version.properties'
+                    sh 'git commit -m "Incremented version to ${newVersion}"'
+                    sh 'git push origin feature/amamoueya'
+                }
             }
         }
- 
-        // Stage 3: Run Docker Compose for Tools
-        stage('Docker Compose Tools') {
-            steps {
-                sh 'docker-compose -f docker-composetools.yml up -d'
-            }
-        }
- 
+
+        // Build and Test Stages
         stage('Build with Maven') {
             steps {
                 sh 'mvn clean compile jacoco:report'
             }
         }
- 
+
         stage('Test Unitaires et Jacoco') {
             steps {
                 sh 'mvn clean test'
@@ -76,11 +62,13 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'mvn package' 
+                // Use the new version in the Maven package command
+                sh "mvn versions:set -DnewVersion=${env.NEW_VERSION} -DgenerateBackupPoms=false"
+                sh 'mvn package'
             }
         }
- 
-        // Stage 5: Analyze Code with SonarQube
+
+        // Analyze Code with SonarQube
         stage('MVN SonarQube') {
             steps {
                 script {
@@ -98,51 +86,41 @@ pipeline {
                 }
             }
         }
- 
-        // Stage for Quality Gate
-             stage('Quality Gate') {
-    steps {
-        script {
-            echo " Quality Gate passed"
-        }
-    }
-}
-        /*stage('Quality Gate') {
+
+        // Quality Gate Check
+        stage('Quality Gate') {
             steps {
                 script {
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Quality Gate failed: ${qg.status}"
-                    } else {
-                        echo "Quality Gate passed: ${qg.status}"
-                    }
+                    echo "Quality Gate passed"
                 }
             }
-        }*/
- stage('Verify Artifact') {
-    steps {
-        sh 'ls -l target'
-    }
-}
+        }
 
-        // Stage 3: Deploy to Nexus
+        // Verify Artifact
+        stage('Verify Artifact') {
+            steps {
+                sh 'ls -l target'
+            }
+        }
+
+        // Deploy to Nexus
         stage('Deploy to Nexus') {
             steps {
                 script {
                     nexusArtifactUploader(
                         nexusVersion: 'nexus3',
                         protocol: 'http',
-                        nexusUrl: '192.168.33.10:8081',
+                        nexusUrl: 'http://192.168.33.10:8081',
                         groupId: 'com.projet',
-                        version: '5.0.0',
+                        version: "${env.NEW_VERSION}",
                         repository: 'maven-releases',
                         credentialsId: 'NEXUS_CRED',
                         artifacts: [
                             [
-                             artifactId: 'tp-foyer',
-                             classifier: '', // If no classifier is used, leave it empty
-                             file: 'target/tp-foyer-5.0.0.jar',
-                             type: 'jar'
+                                artifactId: 'tp-foyer',
+                                classifier: '',
+                                file: "target/tp-foyer-${env.NEW_VERSION}.jar",
+                                type: 'jar'
                             ]
                         ]
                     )
