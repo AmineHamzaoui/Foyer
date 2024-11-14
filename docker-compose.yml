@@ -2,13 +2,15 @@ version: '3.8'
 
 services:
   mysqldb:
-    image: mysql:5.7
+    image: mysql:latest
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=db
     ports:
       - 3306:3306
+    networks:
+      - myappNetwork
     volumes:
       - db:/var/lib/mysql
   app-foyer:
@@ -26,8 +28,13 @@ services:
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
         "spring.jpa.hibernate.ddl-auto" : "update"
       }'
+    networks:
+      - myappNetwork
     stdin_open: true
     tty: true
 
+networks:
+  myappNetwork:
+  
 volumes:
   db:
