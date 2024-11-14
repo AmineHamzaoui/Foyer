@@ -111,7 +111,7 @@ pipeline {
                   nexusArtifactUploader(
                         nexusVersion: 'nexus3',
                         protocol: 'http',
-                        nexusUrl: 'http://192.168.33.10:8081', // Corrected URL
+                        nexusUrl: '192.168.33.10:8081', // Corrected URL
                         groupId: 'com.projet',
                         version: "${env.NEW_VERSION}",
                         repository: 'maven-releases',
