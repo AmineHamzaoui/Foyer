@@ -18,7 +18,7 @@ pipeline {
             }
         }
 
-        // Increment Version for Release Using versions-maven-plugin
+        // Increment Version Using versions-maven-plugin
         stage('Increment Version') {
             steps {
                 script {
