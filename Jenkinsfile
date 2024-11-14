@@ -38,11 +38,15 @@ pipeline {
                     env.NEW_VERSION = newVersion
 
                     // Commit the updated version.properties back to the repository
-                    sh 'git config user.email "aya.amamou@esprit.tn"'
-                    sh 'git config user.name "ayaamamou00"'
-                    sh 'git add version.properties'
-                    sh 'git commit -m "Incremented version to ${newVersion}"'
-                    sh 'git push origin feature/amamoueya'
+                    sh 'git config user.email "jenkins@example.com"'
+                    sh 'git config user.name "Jenkins"'
+
+                    // Use credentials to push changes
+                    withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh 'git add version.properties'
+                        sh 'git commit -m "Incremented version to ${newVersion}"'
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/AmineHamzaoui/Foyer.git feature/amamoueya"
+                    }
                 }
             }
         }
