@@ -108,10 +108,10 @@ pipeline {
         stage('Deploy to Nexus') {
             steps {
                 script {
-                    nexusArtifactUploader(
+                  nexusArtifactUploader(
                         nexusVersion: 'nexus3',
                         protocol: 'http',
-                        nexusUrl: 'http://192.168.33.10:8081',
+                        nexusUrl: 'http://192.168.33.10:8081', // Corrected URL
                         groupId: 'com.projet',
                         version: "${env.NEW_VERSION}",
                         repository: 'maven-releases',
@@ -125,6 +125,7 @@ pipeline {
                             ]
                         ]
                     )
+
                 }
             }
             post {
