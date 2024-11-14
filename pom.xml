@@ -93,7 +93,31 @@
                     </excludes>
                 </configuration>
             </plugin>
-
+<plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+                <execution>
+                    <id>parse-version</id>
+                    <goals>
+                        <goal>parse-version</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>increment-version</id>
+                    <goals>
+                        <goal>replace-properties</goal>
+                    </goals>
+                    <configuration>
+                        <propertiesFileLocation>./version.properties</propertiesFileLocation>
+                        <regex>^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$</regex>
+                        <replacement>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}</replacement>
+                        <versionString>${project.version}</versionString>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
             <!-- JaCoCo Plugin Configuration -->
             <plugin>
                 <groupId>org.jacoco</groupId>
