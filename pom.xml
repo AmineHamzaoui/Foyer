@@ -93,36 +93,14 @@
                     </excludes>
                 </configuration>
             </plugin>
-<plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.3.0</version>
-            <executions>
-                <execution>
-                    <id>parse-version</id>
-                    <goals>
-                        <goal>parse-version</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <id>increment-version</id>
-                    <goals>
-                        <goal>replace-properties</goal>
-                    </goals>
-                    <configuration>
-                        <propertiesFileLocation>./version.properties</propertiesFileLocation>
-                        <regex>^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$</regex>
-                        <replacement>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}</replacement>
-                        <versionString>${project.version}</versionString>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-                  <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>versions-maven-plugin</artifactId>
-            <version>2.8.1</version> <!-- Use the latest version available -->
-        </plugin>
+
+            <!-- Versions Maven Plugin for Version Management -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.8.1</version> <!-- Use the latest version available -->
+            </plugin>
+
             <!-- JaCoCo Plugin Configuration -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -132,17 +110,3 @@
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-</project>
