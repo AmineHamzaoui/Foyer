@@ -18,7 +18,7 @@ pipeline {
             }
         }
 
-        // Increment Version for Release
+        // Increment Version for Release Using versions-maven-plugin
         stage('Increment Version') {
             steps {
                 script {
@@ -37,11 +37,12 @@ pipeline {
                     // Set the new version as an environment variable for later use
                     env.NEW_VERSION = newVersion
 
+                    // Use versions-maven-plugin to set the new version
+                    sh "mvn versions:set -DnewVersion=${env.NEW_VERSION} -DgenerateBackupPoms=false"
+                    
                     // Commit the updated version.properties back to the repository
                     sh 'git config user.email "jenkins@example.com"'
                     sh 'git config user.name "Jenkins"'
-
-                    // Use credentials to push changes
                     withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh 'git add version.properties'
                         sh 'git commit -m "Incremented version to ${newVersion}"'
@@ -51,7 +52,6 @@ pipeline {
             }
         }
 
-        // Build and Test Stages
         stage('Build with Maven') {
             steps {
                 sh 'mvn clean compile jacoco:report'
@@ -66,8 +66,6 @@ pipeline {
         
         stage('Build') {
             steps {
-                // Use the new version in the Maven package command
-                sh "mvn versions:set -DnewVersion=${env.NEW_VERSION} -DgenerateBackupPoms=false"
                 sh 'mvn package'
             }
         }
@@ -91,7 +89,6 @@ pipeline {
             }
         }
 
-        // Quality Gate Check
         stage('Quality Gate') {
             steps {
                 script {
