@@ -60,6 +60,25 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <!-- Nexus Repository Configuration -->
+        <repository>
+            <id>nexus-repo</id>
+            <url>http://192.168.33.10:8081/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-snapshots</id>
+            <url>http://192.168.33.10:8081/repository/maven-snapshots/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://192.168.33.10:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -79,7 +98,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version> <!-- Use the latest stable version -->
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <goals>
